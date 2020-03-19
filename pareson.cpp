@@ -75,10 +75,10 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
                            void *userData ){
 
    	reson->SetInterleavedBuffer(ebd_l,ebd_l_buff, mono, num_frames);
-   	//reson->SetInterleavedBuffer(ebd_r,ebd_r_buff, mono, num_frames);
-        //reson->SetInterleavedBuffer(birb1,birb1_buff, mono, num_frames);
-   	//reson->SetInterleavedBuffer(birb2,birb2_buff, mono, num_frames);
-   	//reson->SetInterleavedBuffer(birb3,birb3_buff, mono, num_frames);
+   	reson->SetInterleavedBuffer(ebd_r,ebd_r_buff, mono, num_frames);
+        reson->SetInterleavedBuffer(birb1,birb1_buff, mono, num_frames);
+   	reson->SetInterleavedBuffer(birb2,birb2_buff, mono, num_frames);
+   	reson->SetInterleavedBuffer(birb3,birb3_buff, mono, num_frames);
 	if(blockcounter == 1 ){
 		readnext=true;
 		bufferoffset = 1;
@@ -117,11 +117,11 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
 
 int main(int argc, char** argv) {
 
-	const char * febd_l= "/home/pi/pareson/resources/ebd_l.wav" ;
-	const char * febd_r= "/home/pi/pareson/resources/ebd_r.wav" ;
-	const char * fbirb1= "/home/pi/pareson/resources/birb1.wav" ;
-	const char * fbirb2= "/home/pi/pareson/resources/birb2.wav" ;
-	const char * fbirb3= "/home/pi/pareson/resources/birb3.wav" ;
+	const char * febd_l= "resources/ebd_l.wav" ;
+	const char * febd_r= "resources/ebd_r.wav" ;
+	const char * fbirb1= "resources/birb1.wav" ;
+	const char * fbirb2= "resources/birb2.wav" ;
+	const char * fbirb3= "resources/birb3.wav" ;
         PaError err;
 	PaStream *stream;
 
