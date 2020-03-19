@@ -1,1 +1,1 @@
- g++ -g -I./ pareson.cpp -o pareson libResonanceAudioStatic.a -lportaudio -lasound -pthread -lsndfile
+ g++ -g -I./ pareson.cpp -o build/pareson libResonanceAudioStatic.a -lportaudio -lasound -pthread -lsndfile

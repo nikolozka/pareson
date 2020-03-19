@@ -117,11 +117,11 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
 
 int main(int argc, char** argv) {
 
-	const char * febd_l= "resources/ebd_l.wav" ;
-	const char * febd_r= "resources/ebd_r.wav" ;
-	const char * fbirb1= "resources/birb1.wav" ;
-	const char * fbirb2= "resources/birb2.wav" ;
-	const char * fbirb3= "resources/birb3.wav" ;
+	const char * febd_l= "/home/pi/pareson/resources/ebd_l.wav" ;
+	const char * febd_r= "/home/pi/pareson/resources/ebd_r.wav" ;
+	const char * fbirb1= "/home/pi/pareson/resources/birb1.wav" ;
+	const char * fbirb2= "/home/pi/pareson/resources/birb2.wav" ;
+	const char * fbirb3= "/home/pi/pareson/resources/birb3.wav" ;
         PaError err;
 	PaStream *stream;
 
