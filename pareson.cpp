@@ -281,6 +281,32 @@ int main(int argc, char** argv) {
 
         q.Print();
 
+        osc::OutboundPacketStream p( buffer, OUTPUT_BUFFER_SIZE );
+        p << osc::BeginBundleImmediate
+
+                << osc::BeginMessage( "/w" )
+                << (float)(q.Gets())
+//              << (float)1
+                << osc::EndMessage
+
+                << osc::BeginMessage( "/x" )
+                << (float)q.Getx()
+//              << (float)0
+                << osc::EndMessage
+
+                << osc::BeginMessage( "/y" )
+                << (float)(q.Gety())
+//              << (float)0
+                << osc::EndMessage
+
+                << osc::BeginMessage( "/z" )
+                << (float)(q.Getz())
+//              << (float)0
+                << osc::EndMessage
+
+                << osc::EndBundle;
+        transmitSocket.Send( p.Data(), p.Size() );
+
 	reson->SetHeadRotation(q.Getx(),q.Gety(),q.Getz(),q.Gets());
 
 	if(readnext){
