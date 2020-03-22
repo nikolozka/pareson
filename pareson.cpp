@@ -4,12 +4,33 @@
 #include "resonance_audio_api.h"
 #include "binaural_surround_renderer.h"
 
+#include "RTIMULib.h"
+#include "/usr/local/include/oscpack/osc/OscOutboundPacketStream.h"
+#include "/usr/local/include/oscpack/ip/UdpSocket.h"
+#include "quaternion.h"
+
+//#define ADDRESS "127.0.0.1"
+//#define ADDRESS "192.168.43.230"
+//#define ADDRESS "192.168.43.59"
+//#define ADDRESS "192.168.188.62"
+#define ADDRESS "192.168.188.37"
+#define PORT 9000
+#define OUTPUT_BUFFER_SIZE 1024
+
+#define PI 3.141592653589793238462643
+
 #define SAMPLE_RATE 48000
 #define NUM_SECONDS 500
 #define NUM_FRAMES 512
 #define NUM_BLOCKS 10
 #define BUFFER_LEN NUM_FRAMES*NUM_BLOCKS
 //#define BUFFER_LEN SAMPLE_RATE*NUM_SECONDS
+
+RTQuaternion quat;
+RTQuaternion quat_s;
+
+float slerp = 0.5;
+
 
 using namespace vraudio;
 
@@ -59,7 +80,7 @@ int bufferoffset = 0;
 
 ResonanceAudioApi* reson;
 
-RenderingMode quality = kBinauralLowQuality;
+RenderingMode quality = kBinauralHighQuality;
 
 SNDFILE* ebd_l_file;
 SNDFILE* ebd_r_file;
@@ -174,8 +195,23 @@ int main(int argc, char** argv) {
         if( err != paNoError ) goto error;
   	reson = CreateResonanceAudioApi(stereo,num_frames,sample_rate_hz);
 
+	ReflectionProperties* properties = new ReflectionProperties();
+
+	properties->room_dimensions[0] = 10.0;
+	properties->room_dimensions[1] = 10.0;
+	properties->room_dimensions[2] = 10.0;
+
+	properties->coefficients[0] = 5;
+	properties->coefficients[1] = 5;
+	properties->coefficients[2] = 5;
+	properties->coefficients[3] = 5;
+	properties->coefficients[4] = 5;
+	properties->coefficients[5] = 5;
+
+	reson->SetReflectionProperties(*properties);
+
   	reson->SetMasterVolume(1.0);
-  	reson->SetHeadPosition(0,0,0);
+  	reson->SetHeadPosition(0,1,0);
 
   	ebd_l = reson->CreateSoundObjectSource(quality);
   	ebd_r = reson->CreateSoundObjectSource(quality);
@@ -183,17 +219,71 @@ int main(int argc, char** argv) {
   	birb2 = reson->CreateSoundObjectSource(quality);
   	birb3 = reson->CreateSoundObjectSource(quality);
 
-  	reson->SetSourcePosition(ebd_l,2,1,0);
-  	reson->SetSourcePosition(ebd_r,-2,1,0);
-  	reson->SetSourcePosition(birb1,-2,3,0);
-  	reson->SetSourcePosition(birb2,2,-5,0);
-  	reson->SetSourcePosition(birb3,0,2,4);
+  	reson->SetSourcePosition(ebd_l,1,1,-0.5);
+  	reson->SetSourcePosition(ebd_r,-1,1,-0.5);
+  	reson->SetSourcePosition(birb1,-2,1,-3);
+  	reson->SetSourcePosition(birb2,2,1,4);
+  	reson->SetSourcePosition(birb3,0,1,-4);
+
+	int sampleCount = 0;
+    	int sampleRate = 0;
+
+  	uint64_t rateTimer;
+    	uint64_t displayTimer;
+    	uint64_t now;
+
+	RTIMUSettings *settings = new RTIMUSettings("RTIMULib");
+    	RTIMU *imu = RTIMU::createIMU(settings);
+    	if ((imu == NULL) || (imu->IMUType() == RTIMU_TYPE_NULL)) {
+        	std::cout<<"No IMU found\n";
+		goto error;
+    	}
+
+    	imu->IMUInit();
+
+    	imu->setSlerpPower(slerp);
+    	imu->setGyroEnable(true);
+    	imu->setAccelEnable(true);
+    	imu->setCompassEnable(true);
+
+    	rateTimer = RTMath::currentUSecsSinceEpoch();
+
+	UdpTransmitSocket transmitSocket( IpEndpointName( ADDRESS, PORT ) );
+
+    	char buffer[OUTPUT_BUFFER_SIZE];
+    	Quaternion<float> q;
+
 
 	err = Pa_StartStream( stream );
 	if( err != paNoError ) goto error;
 
 	while(1){
-		if(readnext){
+
+	usleep(imu->IMUGetPollInterval() * 10000);
+        while (imu->IMURead()) {
+            RTIMU_DATA imuData = imu->getIMUData();
+            sampleCount++;
+
+            if(imuData.fusionQPoseValid){
+                quat = imuData.fusionQPose;
+            }
+
+            q = Quaternion<float>(quat.scalar(), quat.y(), -quat.z(), -quat.x());
+            q.Normalize();
+
+
+           if ((now - rateTimer) > 1000000) {
+                sampleRate = sampleCount;
+                sampleCount = 0;
+                rateTimer = now;
+           }
+        }
+
+        q.Print();
+
+	reson->SetHeadRotation(q.Getx(),q.Gety(),q.Getz(),q.Gets());
+
+	if(readnext){
 		readnext = false;
 		sf_read_float(ebd_l_file, ebd_l_p+bufferoffset*BUFFER_LEN, BUFFER_LEN) ;
 		sf_read_float(ebd_r_file, ebd_r_p+bufferoffset*BUFFER_LEN, BUFFER_LEN) ;
