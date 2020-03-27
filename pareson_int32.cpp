@@ -103,8 +103,8 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
                            PaStreamCallbackFlags statusFlags,
                            void *userData ){
 
-   	//reson->SetInterleavedBuffer(ebd_l,ebd_l_buff, mono, num_frames);
-   	//reson->SetInterleavedBuffer(ebd_r,ebd_r_buff, mono, num_frames);
+   	reson->SetInterleavedBuffer(ebd_l,ebd_l_buff, mono, num_frames);
+   	reson->SetInterleavedBuffer(ebd_r,ebd_r_buff, mono, num_frames);
         reson->SetInterleavedBuffer(birb1,birb1_buff, mono, num_frames);
    	reson->SetInterleavedBuffer(birb2,birb2_buff, mono, num_frames);
    	reson->SetInterleavedBuffer(birb3,birb3_buff, mono, num_frames);
@@ -139,7 +139,7 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
   	reson->FillInterleavedOutputBuffer(stereo,num_frames,src_buffer_ptr);
 	renderer->GetInterleavedStereoOutput(amb_buffer_ptr,num_frames);
 
-    	float *out = (float*)outputBuffer;
+    	long *out = (long*)outputBuffer;
     	unsigned int i;
     	(void) inputBuffer; /* Prevent unused variable warning. */
     	for( i=0; i<framesPerBuffer*2; i++ ){
@@ -148,8 +148,8 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
 //        	*out++ = src_buffer_ptr[i++]/2.0;  /* left */
 //       	*out++ = src_buffer_ptr[i]/2.0;/* right */
 
-        	*out++ = src_buffer_ptr[i]/1.5 + amb_buffer_ptr[i++]/1.5;  /* left */
-        	*out++ = src_buffer_ptr[i]/1.5  + amb_buffer_ptr[i]/1.5;/* right */
+        	*out++ = (long)((src_buffer_ptr[i]/1.5 + amb_buffer_ptr[i++]/1.5)*1073741823.0);  /* left */
+        	*out++ = (long)((src_buffer_ptr[i]/1.5  + amb_buffer_ptr[i]/1.5)*1073741823.0);/* right */
     	}
     	return 0;
 }
@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
 	const char * fbirb1= "resources/birb1.wav" ;
 	const char * fbirb2= "resources/birb2.wav" ;
 	const char * fbirb3= "resources/birb3.wav" ;
-	const char * fambi= "resources/morning.wav" ;
+	const char * fambi= "resources/interstate.wav" ;
 
 	int sampleCount = 0;
     	int sampleRate = 0;
@@ -249,7 +249,7 @@ int main(int argc, char** argv) {
 	err = Pa_OpenDefaultStream( &stream,
 	                                0,          /* no input channels */
         	                        2,          /* stereo output */
-                	                paFloat32,  /* 32 bit floating point output */
+                	                paInt32,  /* 32 bit floating point output */
                         	        SAMPLE_RATE,/* sample rate */
                                 	n_frames,        /* frames per buffer */
 	                                patestCallback, /* this is your callback function */
