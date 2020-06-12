@@ -104,11 +104,11 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
                            void *userData ){
 
    	reson->SetInterleavedBuffer(ebd_l,ebd_l_buff, mono, num_frames);
-   	reson->SetInterleavedBuffer(ebd_r,ebd_r_buff, mono, num_frames);
+  	reson->SetInterleavedBuffer(ebd_r,ebd_r_buff, mono, num_frames);
         reson->SetInterleavedBuffer(birb1,birb1_buff, mono, num_frames);
    	reson->SetInterleavedBuffer(birb2,birb2_buff, mono, num_frames);
    	reson->SetInterleavedBuffer(birb3,birb3_buff, mono, num_frames);
-	renderer->AddInterleavedInput(ambi_buff,  quad, num_frames);
+	renderer->AddInterleavedInput(ambi_buff,  quad, num_frames); // !!! quad change based on ambisonic file 
 
 	if(blockcounter == 1 ){
 		readnext=true;
@@ -133,7 +133,7 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
 		birb1_buff+=num_frames;
 		birb2_buff+=num_frames;
 		birb3_buff+=num_frames;
-		ambi_buff+=4*num_frames;
+		ambi_buff+=4*num_frames; /// !!! 4 change based on ambisonic file
 	}
         blockcounter++;
   	reson->FillInterleavedOutputBuffer(stereo,num_frames,src_buffer_ptr);
@@ -143,14 +143,14 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
     	unsigned int i;
     	(void) inputBuffer; /* Prevent unused variable warning. */
     	for( i=0; i<framesPerBuffer*2; i++ ){
-//        	*out++ = amb_buffer_ptr[i++]/2.0;  /* left */
-//       	*out++ = amb_buffer_ptr[i]/2.0;/* right */
-//        	*out++ = src_buffer_ptr[i++]/2.0;  /* left */
-//       	*out++ = src_buffer_ptr[i]/2.0;/* right */
-
         	*out++ = (long)((src_buffer_ptr[i]/1.5 + amb_buffer_ptr[i++]/1.5)*1073741823.0);  /* left */
-        	*out++ = (long)((src_buffer_ptr[i]/1.5  + amb_buffer_ptr[i]/1.5)*1073741823.0);/* right */
-    	}
+	       	*out++ = (long)((src_buffer_ptr[i]/1.5  + amb_buffer_ptr[i]/1.5)*1073741823.0);/* right */
+//        	*out++ = (long)((src_buffer_ptr[i++]) *1073741823.0);  /* left */
+//        	*out++ = (long)((src_buffer_ptr[i]) *1073741823.0);/* right */
+//        	*out++ = (long)((amb_buffer_ptr[i++]*0.85)*1073741823.0);  /* left */
+//	       	*out++ = (long)((amb_buffer_ptr[i]*0.85)*1073741823.0);/* right */
+	}
+
     	return 0;
 }
 
@@ -162,6 +162,7 @@ int main(int argc, char** argv) {
 	const char * fbirb2= "resources/birb2.wav" ;
 	const char * fbirb3= "resources/birb3.wav" ;
 	const char * fambi= "resources/interstate.wav" ;
+//	const char * fambi= "resources/britz_ur.wav" ; /// !!! change
 
 	int sampleCount = 0;
     	int sampleRate = 0;
@@ -193,7 +194,7 @@ int main(int argc, char** argv) {
   	birb2_buff = (float*) malloc( sizeof(float) * BUFFER_LEN*2 );
   	birb3_buff = (float*) malloc( sizeof(float) * BUFFER_LEN*2 );
 
-  	ambi_buff = (float*) malloc( sizeof(float) * BUFFER_LEN*8 );
+  	ambi_buff = (float*) malloc( sizeof(float) * BUFFER_LEN*8 ); // !!! 8 change this based on the ambisonic file in use
 
 	ebd_l_p = ebd_l_buff;
 	ebd_r_p = ebd_r_buff;
@@ -259,6 +260,7 @@ int main(int argc, char** argv) {
   	reson = CreateResonanceAudioApi(stereo,num_frames,sample_rate_hz);
 
 	renderer = renderer->Create(num_frames,sample_rate_hz,renderer->kFirstOrderAmbisonics);
+//	renderer = renderer->Create(num_frames,sample_rate_hz,renderer->kSurroundStereo); /// !!! interchange based on file
 
 	properties->dimensions[0] = 10.0;
 	properties->dimensions[1] = 10.0;
@@ -393,7 +395,7 @@ int main(int argc, char** argv) {
 		sf_read_float(birb1_file, birb1_p+bufferoffset*BUFFER_LEN, BUFFER_LEN) ;
 		sf_read_float(birb2_file, birb2_p+bufferoffset*BUFFER_LEN, BUFFER_LEN) ;
 		sf_read_float(birb3_file, birb3_p+bufferoffset*BUFFER_LEN, BUFFER_LEN) ;
-		sf_readf_float(ambi_file,  ambi_p+bufferoffset*BUFFER_LEN*4,  BUFFER_LEN) ;
+		sf_readf_float(ambi_file,  ambi_p+bufferoffset*BUFFER_LEN*4,  BUFFER_LEN) ; // !!! 4 change base on ambisonic file
 		}
 	}
 	

@@ -103,8 +103,8 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
                            PaStreamCallbackFlags statusFlags,
                            void *userData ){
 
-   	//reson->SetInterleavedBuffer(ebd_l,ebd_l_buff, mono, num_frames);
-   	//reson->SetInterleavedBuffer(ebd_r,ebd_r_buff, mono, num_frames);
+   	reson->SetInterleavedBuffer(ebd_l,ebd_l_buff, mono, num_frames);
+   	reson->SetInterleavedBuffer(ebd_r,ebd_r_buff, mono, num_frames);
         reson->SetInterleavedBuffer(birb1,birb1_buff, mono, num_frames);
    	reson->SetInterleavedBuffer(birb2,birb2_buff, mono, num_frames);
    	reson->SetInterleavedBuffer(birb3,birb3_buff, mono, num_frames);
