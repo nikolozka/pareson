@@ -13,6 +13,7 @@
 //#define ADDRESS "192.168.43.230"
 //#define ADDRESS "192.168.43.59"
 //#define ADDRESS "192.168.188.62"
+//#define ADDRESS "192.168.43.122"
 #define ADDRESS "192.168.188.37"
 #define PORT 9000
 #define OUTPUT_BUFFER_SIZE 1024
@@ -103,8 +104,8 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
                            PaStreamCallbackFlags statusFlags,
                            void *userData ){
 
-   	//reson->SetInterleavedBuffer(ebd_l,ebd_l_buff, mono, num_frames);
-  	//reson->SetInterleavedBuffer(ebd_r,ebd_r_buff, mono, num_frames);
+/*   	reson->SetInterleavedBuffer(ebd_l,ebd_l_buff, mono, num_frames);
+  	reson->SetInterleavedBuffer(ebd_r,ebd_r_buff, mono, num_frames);
         reson->SetInterleavedBuffer(birb1,birb1_buff, mono, num_frames);
    	reson->SetInterleavedBuffer(birb2,birb2_buff, mono, num_frames);
    	reson->SetInterleavedBuffer(birb3,birb3_buff, mono, num_frames);
@@ -141,29 +142,30 @@ static int patestCallback( const void *inputBuffer, void *outputBuffer,
 
     	long *out = (long*)outputBuffer;
     	unsigned int i;
-    	(void) inputBuffer; /* Prevent unused variable warning. */
+    	(void) inputBuffer; // Prevent unused variable warning.
     	for( i=0; i<framesPerBuffer*2; i++ ){
-//        	*out++ = (long)((src_buffer_ptr[i]/1.5 + amb_buffer_ptr[i++]/1.5)*1073741823.0);  /* left */
-//	       	*out++ = (long)((src_buffer_ptr[i]/1.5  + amb_buffer_ptr[i]/1.5)*1073741823.0);/* right */
-        	*out++ = (long)((src_buffer_ptr[i++]) *1073741823.0);  /* left */
-        	*out++ = (long)((src_buffer_ptr[i]) *1073741823.0);/* right */
-//        	*out++ = (long)((amb_buffer_ptr[i++]*0.85)*1073741823.0);  /* left */
-//	       	*out++ = (long)((amb_buffer_ptr[i]*0.85)*1073741823.0);/* right */
+        	*out++ = (long)((src_buffer_ptr[i]/1.5 + amb_buffer_ptr[i++]/1.5)*1073741823.0); // left
+	       	*out++ = (long)((src_buffer_ptr[i]/1.5  + amb_buffer_ptr[i]/1.5)*1073741823.0);// right
+//        	*out++ = (long)((src_buffer_ptr[i++]) *1073741823.0);
+//        	*out++ = (long)((src_buffer_ptr[i]) *1073741823.0);
+//        	*out++ = (long)((amb_buffer_ptr[i++]*0.85)*1073741823.0);
+//	       	*out++ = (long)((amb_buffer_ptr[i]*0.85)*1073741823.0);
 	}
-
+*/
     	return 0;
+
 }
 
 int main(int argc, char** argv) {
 
-	const char * febd_l= "resources/ebd_l.wav" ;
+/*	const char * febd_l= "resources/ebd_l.wav" ;
 	const char * febd_r= "resources/ebd_r.wav" ;
 	const char * fbirb1= "resources/birb1.wav" ;
 	const char * fbirb2= "resources/birb2.wav" ;
 	const char * fbirb3= "resources/birb3.wav" ;
 	const char * fambi= "resources/interstate.wav" ;
 //	const char * fambi= "resources/britz_ur.wav" ; /// !!! change
-
+*/
 	int sampleCount = 0;
     	int sampleRate = 0;
 
@@ -178,7 +180,7 @@ int main(int argc, char** argv) {
 	RTIMUSettings *settings = new RTIMUSettings("RTIMULib");
     	RTIMU *imu = RTIMU::createIMU(settings);
 
-	RoomProperties* properties = new RoomProperties();
+/*	RoomProperties* properties = new RoomProperties();
 	ReflectionProperties* refp = new ReflectionProperties();
 	ReverbProperties* revp = new ReverbProperties();
 
@@ -248,13 +250,13 @@ int main(int argc, char** argv) {
         printf( "Default high output latency = %8.4f\n", deviceInfo->defaultHighOutputLatency  );
 
 	err = Pa_OpenDefaultStream( &stream,
-	                                0,          /* no input channels */
-        	                        2,          /* stereo output */
-                	                paInt32,  /* 32 bit floating point output */
-                        	        SAMPLE_RATE,/* sample rate */
-                                	n_frames,        /* frames per buffer */
-	                                patestCallback, /* this is your callback function */
-        	                        &data ); /*This is a pointer that will be passed to your callback*/
+	                                2,          // input
+        	                        2,          // output
+                	                paInt32, //32 bit output
+                        	        SAMPLE_RATE, // sample rate
+                                	n_frames,        // frames per buffer
+	                                patestCallback, // this is your callback function
+        	                        &data ); // This is a pointer that will be passed to your callback
 
         if( err != paNoError ) goto error;
   	reson = CreateResonanceAudioApi(stereo,num_frames,sample_rate_hz);
@@ -305,7 +307,7 @@ int main(int argc, char** argv) {
 	reson->SetSourceRoomEffectsGain(ebd_r,1);
 	reson->SetSourceRoomEffectsGain(birb1,1);
 	reson->SetSourceRoomEffectsGain(birb2,1);
-	reson->SetSourceRoomEffectsGain(birb3,1);
+	reson->SetSourceRoomEffectsGain(birb3,1); */
 
     	if ((imu == NULL) || (imu->IMUType() == RTIMU_TYPE_NULL)) {
         	std::cout<<"No IMU found\n";
@@ -323,8 +325,8 @@ int main(int argc, char** argv) {
 
 
 
-	err = Pa_StartStream( stream );
-	if( err != paNoError ) goto error;
+//	err = Pa_StartStream( stream );
+//	if( err != paNoError ) goto error;
 
 	
 
@@ -339,8 +341,10 @@ int main(int argc, char** argv) {
                 quat = imuData.fusionQPose;
             }
 
-            q = Quaternion<float>(quat.scalar(), quat.y(), -quat.z(), -quat.x());
-            q.Normalize();
+            //q = Quaternion<float>(quat.scalar(), quat.y(), -quat.z(), -quat.x());
+//            q = Quaternion<float>(quat.scalar(), quat.y(), quat.z(), quat.x());
+            q = Quaternion<float>(-quat.scalar(), quat.y(), -quat.z(), quat.x());
+            //q.Normalize();
 
 
            if ((now - rateTimer) > 1000000) {
@@ -378,7 +382,7 @@ int main(int argc, char** argv) {
                 << osc::EndBundle;
         transmitSocket.Send( p.Data(), p.Size() );
 
-	reson->SetHeadRotation(q.Getx(),q.Gety(),q.Getz(),q.Gets());
+/*	reson->SetHeadRotation(q.Getx(),q.Gety(),q.Getz(),q.Gets());
 	renderer->SetHeadRotation(q.Gets(),q.Getx(),q.Gety(),q.Getz());
 
 	if(sf_seek(ebd_l_file,1,SEEK_CUR)==-1) sf_seek(ebd_l_file,0,SEEK_SET); else  sf_seek(ebd_l_file,-1,SEEK_CUR);
@@ -396,13 +400,12 @@ int main(int argc, char** argv) {
 		sf_read_float(birb2_file, birb2_p+bufferoffset*BUFFER_LEN, BUFFER_LEN) ;
 		sf_read_float(birb3_file, birb3_p+bufferoffset*BUFFER_LEN, BUFFER_LEN) ;
 		sf_readf_float(ambi_file,  ambi_p+bufferoffset*BUFFER_LEN*4,  BUFFER_LEN) ; // !!! 4 change base on ambisonic file
-		}
+		}*/
 	}
-	
 
 	//Pa_Sleep(NUM_SECONDS*1000);
 
-	err = Pa_StopStream( stream );
+	/*err = Pa_StopStream( stream );
 	if( err != paNoError ) goto error;
 	err = Pa_CloseStream( stream );
 	if( err != paNoError ) goto error;
@@ -421,13 +424,13 @@ int main(int argc, char** argv) {
   	free(birb1_buff);
   	free(birb2_buff);
   	free(birb3_buff);
-  	free(ambi_buff);
+  	free(ambi_buff);*/
   	return 0;
 
   error:
 
 	std::cout<<"do we ever get here on normal execution?!\n";
-  	Pa_Terminate();
+/*  	Pa_Terminate();
 
 	sf_close(ebd_l_file);
 	sf_close(ebd_r_file);
@@ -444,7 +447,7 @@ int main(int argc, char** argv) {
   	free(birb1_buff);
   	free(birb2_buff);
   	free(birb3_buff);
-  	free(ambi_buff);
+  	free(ambi_buff);*/
 
   	fprintf( stderr, "Error number: %d\n", err );
   	fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ) );
