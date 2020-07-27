@@ -8,4 +8,5 @@ also a bunch of hfiles that are included
 
 will restructure
 
-octave for IMU calibratio
+octave for IMU calibration
+
